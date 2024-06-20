@@ -9,6 +9,7 @@ import android.util.Log;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -23,7 +24,7 @@ public class UpdateChecker extends CordovaPlugin {
   private Runnable checkRunnable;
   private String updateCheckUrl;
   private static final String TAG = "UpdateChecker";
-
+  private CallbackContext reloadCallbackContext;
 
   @Override
   protected void pluginInitialize() {
@@ -39,20 +40,6 @@ public class UpdateChecker extends CordovaPlugin {
   }
 
   @Override
-  public void onResume(boolean multitasking) {
-    super.onResume(multitasking);
-    Log.d(TAG, "App resumed, starting update checker");
-    startUpdateChecker();
-  }
-
-  @Override
-  public void onReset() {
-    super.onReset();
-    Log.d(TAG, "App resumed, starting update checker");
-    startUpdateChecker();
-  }
-
-  @Override
   public void onPause(boolean multitasking) {
     super.onPause(multitasking);
     Log.d(TAG, "App paused, stopping update checker");
@@ -64,15 +51,20 @@ public class UpdateChecker extends CordovaPlugin {
     if (action.equals("setUpdateCheckUrl")) {
       setUpdateCheckUrl(args.getString(0), callbackContext);
       return true;
+    } else if (action.equals("registerReloadCallback")) {
+      reloadCallbackContext = callbackContext;
+      return true;
     }
     return false;
   }
 
   private void setUpdateCheckUrl(String url, CallbackContext callbackContext) {
-    updateCheckUrl = url;
-    Log.d(TAG, "Update check URL set to: " + url);
-    callbackContext.success("URL set successfully");
-    startUpdateChecker();
+    if (updateCheckUrl == null) {
+      updateCheckUrl = url;
+      Log.d(TAG, "Update check URL set to: " + url);
+      callbackContext.success("URL set successfully");
+      startUpdateChecker();
+    }
   }
 
   private void checkForUpdate() {
@@ -104,7 +96,13 @@ public class UpdateChecker extends CordovaPlugin {
                 .setPositiveButton("Reload", (dialog, which) -> {
                   cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
                       .putString("lastModified", Long.toString(lastModified)).apply();
-                  cordova.getActivity().recreate();
+                  cordova.getActivity().runOnUiThread(() -> {
+                    if (reloadCallbackContext != null) {
+                      PluginResult result = new PluginResult(PluginResult.Status.OK, "reload");
+                      result.setKeepCallback(true);
+                      reloadCallbackContext.sendPluginResult(result);
+                    }
+                  });
                 })
                 .setNegativeButton("Later", null)
                 .show();
@@ -127,4 +125,3 @@ public class UpdateChecker extends CordovaPlugin {
     handler.removeCallbacks(checkRunnable);
   }
 }
-
