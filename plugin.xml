@@ -10,7 +10,7 @@
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="UpdateChecker">
-                <param name="android-package" value="com.example.updatechecker.UpdateChecker" />
+                <param name="android-package" value="com.webile.updatechecker.UpdateChecker" />
             </feature>
         </config-file>
         <source-file src="src/android/UpdateChecker.java" target-dir="src/com/example/updatechecker" />
