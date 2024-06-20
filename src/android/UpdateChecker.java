@@ -20,6 +20,7 @@ import java.net.URL;
 public class UpdateChecker extends CordovaPlugin {
 
   private static int CHECK_INTERVAL_MS = -1;
+  private long lastModified = 0;
   private Handler handler;
   private Runnable checkRunnable;
   private String updateCheckUrl;
@@ -61,8 +62,20 @@ public class UpdateChecker extends CordovaPlugin {
     } else if (action.equals("registerReloadCallback")) {
       reloadCallbackContext = callbackContext;
       return true;
+    } else if (action.equals("userDecision")) {
+      handleUserDecision(args.getString(0), callbackContext);
+      return true;
     }
     return false;
+  }
+  private void handleUserDecision(String decision, CallbackContext callbackContext) {
+    if ("reload".equals(decision)) {
+      cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
+              .putString("lastModified", Long.toString(lastModified)).apply();
+      callbackContext.success("Timestamp updated");
+    } else {
+      callbackContext.success("Reload cancelled");
+    }
   }
 
   private void setUrlAndTimeout(String url, int timeOut, CallbackContext callbackContext) {
@@ -95,7 +108,7 @@ public class UpdateChecker extends CordovaPlugin {
         connection.setRequestMethod("HEAD");
         connection.connect();
 
-        long lastModified = connection.getLastModified();
+        lastModified = connection.getLastModified();
         Log.d(TAG, "Last modified time from server: " + lastModified);
         long storedTimestamp = Long
             .parseLong(cordova.getActivity().getPreferences(MODE_PRIVATE).getString("lastModified", "0"));
@@ -104,10 +117,8 @@ public class UpdateChecker extends CordovaPlugin {
         if (lastModified > storedTimestamp) {
           cordova.getActivity().runOnUiThread(() -> {
             Log.d(TAG, "Update available, prompting user to reload");
-            cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
-                .putString("lastModified", Long.toString(lastModified)).apply();
             if (reloadCallbackContext != null) {
-              PluginResult result = new PluginResult(PluginResult.Status.OK, "reload");
+              PluginResult result = new PluginResult(PluginResult.Status.OK, "prompt_reload");
               result.setKeepCallback(true);
               reloadCallbackContext.sendPluginResult(result);
             }
