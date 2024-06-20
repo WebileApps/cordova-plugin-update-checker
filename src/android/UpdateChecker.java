@@ -40,6 +40,13 @@ public class UpdateChecker extends CordovaPlugin {
   }
 
   @Override
+  public void onResume(boolean multitasking) {
+    super.onResume(multitasking);
+    Log.d(TAG, "App resumed, starting update checker");
+    startUpdateChecker();
+  }
+
+  @Override
   public void onPause(boolean multitasking) {
     super.onPause(multitasking);
     Log.d(TAG, "App paused, stopping update checker");
@@ -98,7 +105,7 @@ public class UpdateChecker extends CordovaPlugin {
           cordova.getActivity().runOnUiThread(() -> {
             Log.d(TAG, "Update available, prompting user to reload");
             cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
-                    .putString("lastModified", Long.toString(lastModified)).apply();
+                .putString("lastModified", Long.toString(lastModified)).apply();
             if (reloadCallbackContext != null) {
               PluginResult result = new PluginResult(PluginResult.Status.OK, "reload");
               result.setKeepCallback(true);
