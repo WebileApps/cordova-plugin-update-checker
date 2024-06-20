@@ -1,0 +1,12 @@
+{
+  "name": "cordova-plugin-update-checker",
+  "version": "1.0.0",
+  "description": "Cordova Update Checker Plugin",
+  "cordova": {
+    "id": "cordova-plugin-update-checker",
+    "platforms": ["android"]
+  },
+  "author": "Your Name",
+  "license": "Apache-2.0"
+}
+
