@@ -48,8 +48,8 @@ public class UpdateChecker extends CordovaPlugin {
 
   @Override
   public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-    if (action.equals("setUpdateCheckUrl")) {
-      setUpdateCheckUrl(args.getString(0), args.getInt(1), callbackContext);
+    if (action.equals("setUrlAndTimeout")) {
+      setUrlAndTimeout(args.getString(0), args.getInt(1), callbackContext);
       return true;
     } else if (action.equals("registerReloadCallback")) {
       reloadCallbackContext = callbackContext;
@@ -58,7 +58,7 @@ public class UpdateChecker extends CordovaPlugin {
     return false;
   }
 
-  private void setUpdateCheckUrl(String url, int timeOut, CallbackContext callbackContext) {
+  private void setUrlAndTimeout(String url, int timeOut, CallbackContext callbackContext) {
     if (CHECK_INTERVAL_MS == -1) {
       CHECK_INTERVAL_MS = timeOut;
       Log.d(TAG, "Timeout set to: " + timeOut);
