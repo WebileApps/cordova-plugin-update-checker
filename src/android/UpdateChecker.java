@@ -19,7 +19,7 @@ import java.net.URL;
 
 public class UpdateChecker extends CordovaPlugin {
 
-  private static final int CHECK_INTERVAL_MS = 60000; // 60 seconds
+  private static int CHECK_INTERVAL_MS = -1;
   private Handler handler;
   private Runnable checkRunnable;
   private String updateCheckUrl;
@@ -49,7 +49,7 @@ public class UpdateChecker extends CordovaPlugin {
   @Override
   public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
     if (action.equals("setUpdateCheckUrl")) {
-      setUpdateCheckUrl(args.getString(0), callbackContext);
+      setUpdateCheckUrl(args.getString(0), args.getInt(1), callbackContext);
       return true;
     } else if (action.equals("registerReloadCallback")) {
       reloadCallbackContext = callbackContext;
@@ -58,7 +58,11 @@ public class UpdateChecker extends CordovaPlugin {
     return false;
   }
 
-  private void setUpdateCheckUrl(String url, CallbackContext callbackContext) {
+  private void setUpdateCheckUrl(String url, int timeOut, CallbackContext callbackContext) {
+    if (CHECK_INTERVAL_MS == -1) {
+      CHECK_INTERVAL_MS = timeOut;
+      Log.d(TAG, "Timeout set to: " + timeOut);
+    }
     if (updateCheckUrl == null) {
       updateCheckUrl = url;
       Log.d(TAG, "Update check URL set to: " + url);
@@ -70,6 +74,10 @@ public class UpdateChecker extends CordovaPlugin {
   private void checkForUpdate() {
     if (updateCheckUrl == null || updateCheckUrl.isEmpty()) {
       Log.w(TAG, "No URL set for update checking");
+      return;
+    }
+    if (CHECK_INTERVAL_MS == -1) {
+      Log.w(TAG, "Timeout not set");
       return;
     }
     cordova.getThreadPool().execute(() -> {
@@ -89,6 +97,8 @@ public class UpdateChecker extends CordovaPlugin {
         if (lastModified > storedTimestamp) {
           cordova.getActivity().runOnUiThread(() -> {
             Log.d(TAG, "Update available, prompting user to reload");
+            cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
+                    .putString("lastModified", Long.toString(lastModified)).apply();
             if (reloadCallbackContext != null) {
               PluginResult result = new PluginResult(PluginResult.Status.OK, "reload");
               result.setKeepCallback(true);
