@@ -13,6 +13,6 @@
                 <param name="android-package" value="com.webile.updatechecker.UpdateChecker" />
             </feature>
         </config-file>
-        <source-file src="src/android/UpdateChecker.java" target-dir="src/com/example/updatechecker" />
+        <source-file src="src/android/UpdateChecker.java" target-dir="src/com/webile/updatechecker" />
     </platform>
 </plugin>

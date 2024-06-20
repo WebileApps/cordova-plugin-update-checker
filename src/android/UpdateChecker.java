@@ -1,4 +1,4 @@
-package com.example.updatechecker;
+package com.webile.updatechecker;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -69,7 +69,6 @@ public class UpdateChecker extends CordovaPlugin {
 
   private void checkForUpdate() {
     if (updateCheckUrl == null || updateCheckUrl.isEmpty()) {
-        // No URL set, nothing to do
         Log.w(TAG, "No URL set for update checking");
         return;
     }
