@@ -6,7 +6,7 @@
     "id": "cordova-plugin-update-checker",
     "platforms": ["android"]
   },
-  "author": "Your Name",
+  "author": "Samuel Nittala",
   "license": "Apache-2.0"
 }
 

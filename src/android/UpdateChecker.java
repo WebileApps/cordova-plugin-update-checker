@@ -72,8 +72,10 @@ public class UpdateChecker extends CordovaPlugin {
     if ("reload".equals(decision)) {
       cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
               .putString("lastModified", Long.toString(lastModified)).apply();
+      Log.d(TAG, "Timestamp updated");
       callbackContext.success("Timestamp updated");
     } else {
+      Log.d(TAG, "Reload cancelled");
       callbackContext.success("Reload cancelled");
     }
   }
