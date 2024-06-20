@@ -69,8 +69,8 @@ public class UpdateChecker extends CordovaPlugin {
 
   private void checkForUpdate() {
     if (updateCheckUrl == null || updateCheckUrl.isEmpty()) {
-        Log.w(TAG, "No URL set for update checking");
-        return;
+      Log.w(TAG, "No URL set for update checking");
+      return;
     }
     cordova.getThreadPool().execute(() -> {
       try {
@@ -89,25 +89,13 @@ public class UpdateChecker extends CordovaPlugin {
         if (lastModified > storedTimestamp) {
           cordova.getActivity().runOnUiThread(() -> {
             Log.d(TAG, "Update available, prompting user to reload");
-            new AlertDialog.Builder(cordova.getActivity())
-                .setTitle("Update Available")
-                .setMessage("A new version is available. Do you want to reload?")
-                .setPositiveButton("Reload", (dialog, which) -> {
-                  cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
-                      .putString("lastModified", Long.toString(lastModified)).apply();
-                  cordova.getActivity().runOnUiThread(() -> {
-                    if (reloadCallbackContext != null) {
-                      PluginResult result = new PluginResult(PluginResult.Status.OK, "reload");
-                      result.setKeepCallback(true);
-                      reloadCallbackContext.sendPluginResult(result);
-                    }
-                  });
-                })
-                .setNegativeButton("Later", null)
-                .show();
+            if (reloadCallbackContext != null) {
+              PluginResult result = new PluginResult(PluginResult.Status.OK, "reload");
+              result.setKeepCallback(true);
+              reloadCallbackContext.sendPluginResult(result);
+            }
           });
-        }
-        else {
+        } else {
           Log.d(TAG, "No update available");
         }
       } catch (IOException e) {
