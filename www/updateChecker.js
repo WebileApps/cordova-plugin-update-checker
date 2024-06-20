@@ -1,10 +1,9 @@
 var exec = require('cordova/exec');
 
 var UpdateChecker = {
-    checkForUpdate: function (url, successCallback, errorCallback) {
-        exec(successCallback, errorCallback, 'UpdateChecker', 'checkForUpdate', [url]);
+    setUpdateCheckUrl: function(url, successCallback, errorCallback) {
+        exec(successCallback, errorCallback, 'UpdateChecker', 'setUpdateCheckUrl', [url]);
     }
 };
 
 module.exports = UpdateChecker;
-
