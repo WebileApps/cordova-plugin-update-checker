@@ -12,62 +12,53 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class UpdateChecker extends CordovaPlugin {
 
-  private static int CHECK_INTERVAL_MS = -1;
   private long lastModified = 0;
-  private Handler handler;
-  private Runnable checkRunnable;
   private String updateCheckUrl;
   private static final String TAG = "UpdateChecker";
   private CallbackContext reloadCallbackContext;
 
   @Override
   protected void pluginInitialize() {
-    handler = new Handler(Looper.getMainLooper());
-    checkRunnable = new Runnable() {
-      @Override
-      public void run() {
-        Log.d(TAG, "Running update check");
-        checkForUpdate();
-        handler.postDelayed(this, CHECK_INTERVAL_MS);
-      }
-    };
+    Log.d(TAG, "Plugin initialized");
+    updateCheckUrl = getContentUrlFromConfig();
+    if (updateCheckUrl != null && !updateCheckUrl.isEmpty()) {
+      Log.d(TAG, "Update check URL set to: " + updateCheckUrl);
+      checkForUpdate();
+    } else {
+      Log.w(TAG, "No URL set for update checking");
+    }
   }
 
   @Override
   public void onResume(boolean multitasking) {
     super.onResume(multitasking);
     Log.d(TAG, "App resumed, starting update checker");
-    startUpdateChecker();
-  }
-
-  @Override
-  public void onPause(boolean multitasking) {
-    super.onPause(multitasking);
-    Log.d(TAG, "App paused, stopping update checker");
-    stopUpdateChecker();
+    checkForUpdate();
   }
 
   @Override
   public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-    if (action.equals("setUrlAndTimeout")) {
-      setUrlAndTimeout(args.getString(0), args.getInt(1), callbackContext);
+    if (action.equals("userDecision")) {
+      handleUserDecision(args.getString(0), callbackContext);
       return true;
     } else if (action.equals("registerReloadCallback")) {
       reloadCallbackContext = callbackContext;
       return true;
-    } else if (action.equals("userDecision")) {
-      handleUserDecision(args.getString(0), callbackContext);
-      return true;
     }
     return false;
   }
+
   private void handleUserDecision(String decision, CallbackContext callbackContext) {
     if ("reload".equals(decision)) {
       cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
@@ -80,26 +71,32 @@ public class UpdateChecker extends CordovaPlugin {
     }
   }
 
-  private void setUrlAndTimeout(String url, int timeOut, CallbackContext callbackContext) {
-    if (CHECK_INTERVAL_MS == -1) {
-      CHECK_INTERVAL_MS = timeOut;
-      Log.d(TAG, "Timeout set to: " + timeOut);
+  private String getContentUrlFromConfig() {
+    String url = null;
+    try {
+      InputStream inputStream = cordova.getActivity().getAssets().open("www/config.xml");
+      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+      XmlPullParser parser = factory.newPullParser();
+      parser.setInput(inputStream, "UTF-8");
+
+      int eventType = parser.getEventType();
+      while (eventType != XmlPullParser.END_DOCUMENT) {
+        if (eventType == XmlPullParser.START_TAG && "content".equals(parser.getName())) {
+          url = parser.getAttributeValue(null, "src");
+          break;
+        }
+        eventType = parser.next();
+      }
+      inputStream.close();
+    } catch (XmlPullParserException | IOException e) {
+      Log.e(TAG, "Error reading config.xml", e);
     }
-    if (updateCheckUrl == null) {
-      updateCheckUrl = url;
-      Log.d(TAG, "Update check URL set to: " + url);
-      callbackContext.success("URL set successfully");
-      startUpdateChecker();
-    }
+    return url;
   }
 
   private void checkForUpdate() {
     if (updateCheckUrl == null || updateCheckUrl.isEmpty()) {
       Log.w(TAG, "No URL set for update checking");
-      return;
-    }
-    if (CHECK_INTERVAL_MS == -1) {
-      Log.w(TAG, "Timeout not set");
       return;
     }
     cordova.getThreadPool().execute(() -> {
@@ -132,13 +129,5 @@ public class UpdateChecker extends CordovaPlugin {
         Log.e(TAG, "Error checking for updates: ", e);
       }
     });
-  }
-
-  private void startUpdateChecker() {
-    handler.post(checkRunnable);
-  }
-
-  private void stopUpdateChecker() {
-    handler.removeCallbacks(checkRunnable);
   }
 }
