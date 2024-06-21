@@ -5,9 +5,12 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.AlertDialog;
 import android.util.Log;
 
+import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.ConfigXmlParser;
 import org.apache.cordova.engine.SystemWebViewEngine;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -29,6 +32,15 @@ public class UpdateChecker extends CordovaPlugin {
     } else {
       Log.w(TAG, "No URL set for update checking");
     }
+  }
+  @Override
+  public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    Log.d(TAG, "Execute called with action: " + action);
+    if (action.equals("init")) {
+      callbackContext.success("UpdateChecker initialized");
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -63,7 +75,7 @@ public class UpdateChecker extends CordovaPlugin {
                 .parseLong(cordova.getActivity().getPreferences(MODE_PRIVATE).getString("lastModified", "0"));
         Log.d(TAG, "Stored last modified time: " + storedTimestamp);
 
-        if (lastModified >= storedTimestamp) {
+        if (lastModified > storedTimestamp) {
           cordova.getActivity().runOnUiThread(() -> {
             Log.d(TAG, "Update available, prompting user to reload");
             showUpdateDialog();
