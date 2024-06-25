@@ -33,15 +33,6 @@ public class UpdateChecker extends CordovaPlugin {
       Log.w(TAG, "No URL set for update checking");
     }
   }
-  @Override
-  public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-    Log.d(TAG, "Execute called with action: " + action);
-    if (action.equals("init")) {
-      callbackContext.success("UpdateChecker initialized");
-      return true;
-    }
-    return false;
-  }
 
   @Override
   public void onResume(boolean multitasking) {

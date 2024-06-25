@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="cordova-plugin-update-checker" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-update-checker" version="1.0.0"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <name>UpdateChecker</name>
     <description>Cordova Update Checker Plugin</description>
     <license>Apache 2.0</license>
@@ -11,6 +13,7 @@
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="UpdateChecker">
                 <param name="android-package" value="com.webile.updatechecker.UpdateChecker" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
         <source-file src="src/android/UpdateChecker.java" target-dir="src/com/webile/updatechecker" />
