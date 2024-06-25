@@ -6,9 +6,6 @@
     <description>Cordova Update Checker Plugin</description>
     <license>Apache 2.0</license>
     <keywords>cordova,update,checker</keywords>
-    <js-module src="www/updateChecker.js" name="UpdateChecker">
-        <clobbers target="cordova.plugins.updateChecker" />
-    </js-module>
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="UpdateChecker">
