@@ -22,13 +22,14 @@ public class UpdateChecker extends CordovaPlugin {
   private String launchUrl;
   private static final String TAG = "UpdateChecker";
 
+  private boolean isDialogActive = false;
+
   @Override
   protected void pluginInitialize() {
     Log.d(TAG, "Plugin initialized");
     launchUrl = getLaunchUrlFromConfig();
     if (launchUrl != null && !launchUrl.isEmpty()) {
       Log.d(TAG, "Update check URL set to: " + launchUrl);
-      checkForUpdate();
     } else {
       Log.w(TAG, "No URL set for update checking");
     }
@@ -38,7 +39,9 @@ public class UpdateChecker extends CordovaPlugin {
   public void onResume(boolean multitasking) {
     super.onResume(multitasking);
     Log.d(TAG, "App resumed, starting update checker");
-    checkForUpdate();
+    if (!isDialogActive) {
+      checkForUpdate();
+    }
   }
 
   private String getLaunchUrlFromConfig() {
@@ -67,6 +70,7 @@ public class UpdateChecker extends CordovaPlugin {
         Log.d(TAG, "Stored last modified time: " + storedTimestamp);
 
         if (lastModified > storedTimestamp) {
+          isDialogActive = true;
           cordova.getActivity().runOnUiThread(() -> {
             Log.d(TAG, "Update available, prompting user to reload");
             showUpdateDialog();
@@ -83,13 +87,14 @@ public class UpdateChecker extends CordovaPlugin {
   private void showUpdateDialog() {
     new AlertDialog.Builder(cordova.getActivity())
             .setTitle("Update Available")
-            .setMessage("A new version is available. Do you want to reload?")
-            .setPositiveButton("Reload", (dialog, which) -> {
+            .setMessage("A new version of the application is available. Please update now")
+            .setPositiveButton("Update", (dialog, which) -> {
               cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
                       .putString("lastModified", Long.toString(lastModified)).apply();
+              isDialogActive = false;
               reloadWebView();
             })
-            .setNegativeButton("Later", null)
+            .setCancelable(false)
             .show();
   }
 
