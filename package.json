@@ -1,12 +1,14 @@
 {
-  "name": "cordova-plugin-update-checker",
-  "version": "1.0.0",
+  "name": "@webileapps/cordova-plugin-update-checker",
+  "version": "0.1.0",
   "description": "Cordova Update Checker Plugin",
   "cordova": {
-    "id": "cordova-plugin-update-checker",
-    "platforms": ["android"]
+    "id": "@webileapps/cordova-plugin-update-checker",
+    "platforms": [
+      "android"
+    ]
   },
+  "private": false,
   "author": "Samuel Nittala",
   "license": "Apache-2.0"
 }
-
