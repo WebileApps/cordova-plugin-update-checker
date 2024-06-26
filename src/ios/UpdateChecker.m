@@ -86,9 +86,9 @@
 
 - (void)showUpdateDialog {
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Update Available"
-                                                                             message:@"A new version is available. Do you want to reload?"
+                                                                             message:@"A new version of the application is available. Please update now"
                                                                       preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *reloadAction = [UIAlertAction actionWithTitle:@"Reload"
+    UIAlertAction *reloadAction = [UIAlertAction actionWithTitle:@"Update"
                                                            style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction *action) {
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -96,11 +96,7 @@
         [defaults synchronize];
         [self reloadWebView];
     }];
-    UIAlertAction *laterAction = [UIAlertAction actionWithTitle:@"Later"
-                                                          style:UIAlertActionStyleCancel
-                                                        handler:nil];
     [alertController addAction:reloadAction];
-    [alertController addAction:laterAction];
     [self.viewController presentViewController:alertController animated:YES completion:nil];
 }
 
