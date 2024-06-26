@@ -15,4 +15,13 @@
         </config-file>
         <source-file src="src/android/UpdateChecker.java" target-dir="src/com/webile/updatechecker" />
     </platform>
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="UpdateChecker">
+                <param name="ios-package" value="UpdateChecker" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+        <source-file src="src/ios/UpdateChecker.m" />
+    </platform>
 </plugin>
