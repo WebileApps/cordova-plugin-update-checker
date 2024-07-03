@@ -66,10 +66,13 @@ public class UpdateChecker extends CordovaPlugin {
         lastModified = connection.getLastModified();
         Log.d(TAG, "Last modified time from server: " + lastModified);
         long storedTimestamp = Long
-                .parseLong(cordova.getActivity().getPreferences(MODE_PRIVATE).getString("lastModified", "0"));
+            .parseLong(cordova.getActivity().getPreferences(MODE_PRIVATE).getString("lastModified", "0"));
         Log.d(TAG, "Stored last modified time: " + storedTimestamp);
 
-        if (lastModified > storedTimestamp) {
+        if (storedTimestamp == 0) {
+          cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
+              .putString("lastModified", Long.toString(lastModified)).apply();
+        } else if (lastModified > storedTimestamp) {
           isDialogActive = true;
           cordova.getActivity().runOnUiThread(() -> {
             Log.d(TAG, "Update available, prompting user to reload");
@@ -86,16 +89,16 @@ public class UpdateChecker extends CordovaPlugin {
 
   private void showUpdateDialog() {
     new AlertDialog.Builder(cordova.getActivity())
-            .setTitle("Update Available")
-            .setMessage("A new version of the application is available. Please update now")
-            .setPositiveButton("Update", (dialog, which) -> {
-              cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
-                      .putString("lastModified", Long.toString(lastModified)).apply();
-              isDialogActive = false;
-              reloadWebView();
-            })
-            .setCancelable(false)
-            .show();
+        .setTitle("Update Available")
+        .setMessage("A new version of the application is available. Please update now")
+        .setPositiveButton("Update", (dialog, which) -> {
+          cordova.getActivity().getPreferences(MODE_PRIVATE).edit()
+              .putString("lastModified", Long.toString(lastModified)).apply();
+          isDialogActive = false;
+          reloadWebView();
+        })
+        .setCancelable(false)
+        .show();
   }
 
   private void reloadWebView() {
