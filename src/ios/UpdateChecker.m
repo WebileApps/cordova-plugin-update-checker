@@ -25,6 +25,16 @@
   } else {
     NSLog(@"No URL set for update checking");
   }
+  // Add observer for application did become active
+  [[NSNotificationCenter defaultCenter]
+      addObserver:self
+         selector:@selector(onResume:)
+             name:UIApplicationDidBecomeActiveNotification
+           object:nil];
+}
+
+- (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)onResume:(NSNotification *)notification {
@@ -143,3 +153,4 @@
 }
 
 @end
+
